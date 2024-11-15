@@ -10,6 +10,9 @@
     "build": "tsc",
     "prepare": "npm run build"
   },
+  "bin": {
+    "codelinker": "./dist/cjs/main.js"
+  },
   "author": "vallasc",
   "license": "MIT",
   "description": "",
