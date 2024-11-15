@@ -1,0 +1,49 @@
+import Html from "tree-sitter-html";
+import { AnchorSymbol } from "../types";
+import { GenericParser } from "./generic";
+
+export class HtmlParser extends GenericParser {
+  constructor() {
+    super();
+    this.parser.setLanguage(Html);
+  }
+
+  parseCodeAnchorLinks(code: string, filePath: string): AnchorSymbol[] {
+    const symbols: AnchorSymbol[] = [];
+    const tree = this.parser.parse(code);
+
+    tree.rootNode
+      .descendantsOfType("element") // Cerca nodi di tipo 'element' per tag HTML generici
+      .forEach((node) => {
+        const startTag = node.firstChild;
+        const endTag = node.lastChild;
+        const tagName = startTag?.firstNamedChild?.text
+        if(tagName !== "a") return
+
+        const hasCodeAttribute = startTag?.namedChildren.some(
+          (node) => node.type === "attribute" && node.firstNamedChild?.text === "code"
+        );
+        if(!hasCodeAttribute) return
+        node.endPosition.column
+
+        symbols.push({
+          name: "a", // Nome del tag
+          type: "a_tag",
+          node: startTag!.text,
+          filePath,
+          position: {
+            start : {
+              row: startTag!.startPosition.row + 1,
+              column: startTag!.startPosition.column + 1,
+            },
+            end : {
+              row: startTag!.endPosition.row + 1,
+              column: startTag!.endPosition.column + 1,
+            }
+          }
+        });
+      });
+
+    return symbols;
+  }
+}
