@@ -1,5 +1,5 @@
 import Javascript from "tree-sitter-javascript";
-import { Node } from "../types";
+import { CodeNode, Node } from "../types";
 import { GenericParser } from "./generic";
 import Parser from "tree-sitter";
 
@@ -13,9 +13,9 @@ export class JavaScriptParser extends GenericParser {
     return super.buildTreeWithCondition(code, JavaScriptParser.nodeBuilder);
   }
 
-  static nodeBuilder(node: Parser.SyntaxNode): Node | null {
-    let name = "-",
-    type = "-";
+  static nodeBuilder(node: Parser.SyntaxNode): CodeNode | null {
+    let name: string;
+    let type: "function" | "class" | "method" | "arrow_function" | "arrow_method";
     switch (node.type) {
       case "function_declaration":
         name = node.childForFieldName("name")?.text ?? "UnknownFunction";
@@ -63,16 +63,19 @@ export class JavaScriptParser extends GenericParser {
     return {
       name,
       type,
+      language: "JavaScript",
+      text: node.text,
       position: {
         start: {
-          row: node.startPosition.row + 1,
-          column: node.startPosition.column + 1,
+          row: node.startPosition.row,
+          column: node.startPosition.column,
         },
         end: {
-          row: node.endPosition.row + 1,
-          column: node.endPosition.column + 1,
+          row: node.endPosition.row,
+          column: node.endPosition.column,
         },
       },
+      children: [] // dummy
     }
   }
 }
