@@ -1,5 +1,5 @@
 public class TestClass {
-  int x = 5;
+  private int x = 5;
 
   public int someMethod(){
   }
